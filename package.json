@@ -1,0 +1,24 @@
+{
+    "name": "tualo-dnsd",
+    "description": "DNSD with Webfrontend",
+    "homepage": "http://tualo.de",
+    "main": "lib/server.js",
+    "version": "0.0.1",
+    "engines": {
+        "node": ">=0.8.0"
+    },
+    "maintainers": [
+        {
+            "name": "Thomas Hoffmann",
+            "email": "thomas.hoffmann@tualo.de",
+            "url": "http://tualo.de/"
+        }
+    ],
+    "readmeFilename": "README.md",
+    "dependencies": {
+        "express": ">=3.1.1",
+        "jade": ">=0.28.2",
+        "dnsd": "*",
+        "socket.io": ">=0.9.14"
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "dnsd":{
+        "port": 9999 
+    },
+    "frontend":{
+        "address": "127.0.0.1", 
+        "port": 8010
+    },
+    "storage": "memory",
+    "log":{
+        "console": true,
+        "errors": true,
+        "warnings": true,
+        "informations": true,
+        "debugs": true
+    }
+}
