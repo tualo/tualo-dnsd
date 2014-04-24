@@ -1,6 +1,6 @@
 {
     "dnsd":{
-        "port": 9999 
+        "port": 5353 
     },
     "frontend":{
         "address": "127.0.0.1", 

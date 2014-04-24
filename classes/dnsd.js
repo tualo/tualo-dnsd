@@ -2,7 +2,7 @@
 
 var express = require('express'),
     path = require('path'),
-    dns = require('dns'),
+    tualo_extjs = require('tualo-extjs'),
     nativedns = require('native-dns');
 
 /**
@@ -68,6 +68,7 @@ DNSD.prototype.initExpress = function(){
     me.server.app.set('view engine', 'jade');
     me.server.app.use(express.static('public'));
     me.server.app.use(me.middleware.bind(me));
+    me.server.app.use(tualo_extjs.middleware.bind(me));
     me.server.app.get(me.server.configuration.basePath+'/',me.loadui.bind(me));
     me.server.app.post(me.server.configuration.basePath+'/',me.loadui.bind(me));
 
@@ -162,9 +163,7 @@ DNSD.prototype.loopQuestions=function(questions,callback,answers){
 DNSD.prototype.onSocketConnection = function(socket){
     //var name = userNames.getGuestName();
     //this.logger.debug('socket','name',name);
-    socket.emit('init', {
-        
-    });
+    socket.emit('init', {});
 }
 
 
