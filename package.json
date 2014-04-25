@@ -3,7 +3,7 @@
     "description": "DNS Proxy with Webfrontend",
     "homepage": "http://tualo.de",
     "main": "lib/server.js",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "engines": {
         "node": ">=0.8.0"
     },
@@ -20,7 +20,7 @@
         "tualo-extjs": ">=5.0.0",
         "tualo-extjs-socketio": ">=0.0.1",
         "jade": ">=0.28.2",
-        "native-dnsd": "0.6.1",
+        "native-dns": "0.6.1",
         "socket.io": ">=0.9.14"
     },
     "license" : "GPLv3",
