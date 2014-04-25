@@ -17,7 +17,7 @@
     "readmeFilename": "README.md",
     "dependencies": {
         "express": ">=3.1.1",
-        "tualo-ext": ">=5.0.0",
+        "tualo-extjs": ">=5.0.0",
         "tualo-extjs-socketio": ">=0.0.1",
         "jade": ">=0.28.2",
         "native-dnsd": "0.6.1",
