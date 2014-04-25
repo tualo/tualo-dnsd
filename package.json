@@ -22,7 +22,7 @@
         "jade": ">=0.28.2",
         "native-dnsd": "0.6.1",
         "socket.io": ">=0.9.14"
-    }
+    },
     "license" : "GPLv3",
     "repository": {
         "type": "git",
