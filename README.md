@@ -14,7 +14,7 @@ You can simply start this server by calling:
 After that you can open the url http://localhost:8010/ in a browser and watch 
 all incomming dns requests, live.
 
-To emulate a request call:
+To make a request, call:
     
     dig @localhost -p 5353 google.com A
     
