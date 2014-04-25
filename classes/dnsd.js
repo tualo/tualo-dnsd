@@ -2,7 +2,9 @@
 
 var express = require('express'),
     path = require('path'),
+    Queries = require('../classes/queries').Queries,
     tualo_extjs = require('tualo-extjs'),
+    tualo_extjs_socketio = new (require('tualo-extjs-socketio')).LibLoader (),
     nativedns = require('native-dns');
 
 /**
@@ -39,10 +41,21 @@ var DNSD = function(server){
 */
 DNSD.prototype.initialize = function(){
     var me = this;
+
+    me.queries = new Queries();
     me.initSocketIO();
     me.initDnsService();
     me.initExpress();
 
+    me.queries.on('create', function(data){
+        me.io.sockets.emit('create',{data: [data]});
+    });
+    me.queries.on('update', function(data){
+        me.io.sockets.emit('update',{data: [data]});
+    });
+    me.queries.on('destroy', function(data){
+        me.io.sockets.emit('destroy',{data: [data]});
+    });
 }
 
 /**
@@ -55,6 +68,8 @@ DNSD.prototype.initSocketIO = function(){
     me.io = require('socket.io').listen(me.server.httpServer);
     me.io.set('log level',1);
     me.io.sockets.on('connection', me.onSocketConnection.bind(me));
+    me.timerIndex = 0;
+
 }
 
 /**
@@ -69,6 +84,7 @@ DNSD.prototype.initExpress = function(){
     me.server.app.use(express.static('public'));
     me.server.app.use(me.middleware.bind(me));
     me.server.app.use(tualo_extjs.middleware.bind(me));
+    me.server.app.use(tualo_extjs_socketio.middleware );
     me.server.app.get(me.server.configuration.basePath+'/',me.loadui.bind(me));
     me.server.app.post(me.server.configuration.basePath+'/',me.loadui.bind(me));
 
@@ -85,25 +101,32 @@ DNSD.prototype.initDnsService = function(){
 
     me.dnsd.on('request', function (request, response) {
         var start = (new Date()).getTime();
+        
         if (typeof request.question !== 'undefined'){
             me.loopQuestions(request.question,function(answers){
                 response.answer = answers ;
+
                 response.send();
+                me.queries.append({
+                    questions: request.question,
+                    answers: answers
+                });
                 me.logger.info('Finished processing request: ' + ( (new Date()).getTime() - start ).toString() + 'ms');
             });
         }else{
             response.send();
             me.logger.info('Finished processing request: ' + ( (new Date()).getTime() - start ).toString() + 'ms');
         }
-        
-        
+
+
     });
 
     me.dnsd.on('error', function (err, buff, req, res) {
         me.logger.error(err.stack);
     });
-
+    me.server.configuration.dnsd.port = 9999;
     me.dnsd.serve(me.server.configuration.dnsd.port);
+    me.logger.info('server port',me.server.configuration.dnsd.port);
 }
 
 /**
@@ -122,16 +145,16 @@ DNSD.prototype.loopQuestions=function(questions,callback,answers){
     var me = this,
         dnsRequest,
         dnsQuestion;
-    
+
     if (typeof answers === 'undefined'){
         answers = [];
     }
-    
+
     if (questions.length === 0){
         callback(answers);
     }else{
         dnsQuestion = nativedns.Question(questions[0]);
-        
+
         dnsRequest = nativedns.Request({
             question: dnsQuestion,
             server: { address: '8.8.8.8', port: 53, type: 'udp' },
@@ -151,6 +174,8 @@ DNSD.prototype.loopQuestions=function(questions,callback,answers){
         dnsRequest.on('end', function () {
             me.loopQuestions(questions.slice(1),callback,answers);
         });
+
+
         dnsRequest.send();
 
     }
@@ -161,9 +186,12 @@ DNSD.prototype.loopQuestions=function(questions,callback,answers){
 * On every new socket.io connection this method will be called.
 */
 DNSD.prototype.onSocketConnection = function(socket){
+    var me = this;
     //var name = userNames.getGuestName();
     //this.logger.debug('socket','name',name);
-    socket.emit('init', {});
+    socket.on('read', function(){
+        
+    });
 }
 
 

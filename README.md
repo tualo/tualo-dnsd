@@ -1,7 +1,7 @@
 Description
 ===========
 
-This server makes the Domain Name System transparent to you. 
+This server makes the Domain Name System transparent for you. 
 
 
 Howto use
@@ -16,6 +16,6 @@ all incomming dns requests, live.
 
 To emulate a request call:
     
-    dig @localhost -p 5353 google.com
+    dig @localhost -p 5353 google.com A
     
 Or simply point a network device to the dns server.

@@ -4,20 +4,12 @@ html(lang="de")
         meta(charset="utf-8")
         title DNS Deamon
         
-        link(rel="stylesheet",href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css")
-        link(rel="stylesheet",href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css")
-        
-
         script(src="/socket.io/socket.io.js")
-        link(rel="stylesheet",href=basePath+"/ext/ext-bootstrap.js")
-        script(src="/application.js")
+        
+        link(rel="stylesheet",href="/ext/packages/ext-theme-neptune-touch/build/resources/ext-theme-neptune-touch-all.css")
+        script(src=basePath+"/ext/ext-all.js")
+        script(src="/tualo-extjs-socketio/data/proxy/SocketIO.js")
+        script(src="/Application.js")
         
     body
-        nav.navbar.navbar-default(role="navigation")
-            div.container-fluid
-                div.navbar-header
-                    a.navbar-brand
-                        img(src="./images/brand.png")
-                        p tualo DNS Proxy
-        script(src="http://code.jquery.com/jquery-2.1.0.min.js")
-        script(src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js")
+        

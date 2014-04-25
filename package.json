@@ -1,6 +1,6 @@
 {
     "name": "tualo-dnsd",
-    "description": "DNSD with Webfrontend",
+    "description": "DNS Proxy with Webfrontend",
     "homepage": "http://tualo.de",
     "main": "lib/server.js",
     "version": "0.0.1",
@@ -17,8 +17,15 @@
     "readmeFilename": "README.md",
     "dependencies": {
         "express": ">=3.1.1",
+        "tualo-ext": ">=5.0.0",
+        "tualo-extjs-socketio": ">=0.0.1",
         "jade": ">=0.28.2",
-        "dnsd": "*",
+        "native-dnsd": "0.6.1",
         "socket.io": ">=0.9.14"
+    }
+    "license" : "GPLv3",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/tualo/tualo-dnsd.git"
     }
 }
