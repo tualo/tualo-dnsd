@@ -124,7 +124,7 @@ DNSD.prototype.initDnsService = function(){
     me.dnsd.on('error', function (err, buff, req, res) {
         me.logger.error(err.stack);
     });
-    me.server.configuration.dnsd.port = 9999;
+    
     me.dnsd.serve(me.server.configuration.dnsd.port);
     me.logger.info('server port',me.server.configuration.dnsd.port);
 }
