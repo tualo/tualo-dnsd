@@ -87,6 +87,7 @@ Ext.define('DNSProxy.app.Application', {
             fields: [
                 {name: 'id',   type: 'string'},
                 {name: 'name',   type: 'string'},
+                {name: 'tld',   type: 'string'},
                 {name: 'address', type: 'string'},
                 {name: 'ttl', type: 'number'},
                 {name: 'class', type: 'number'},
@@ -98,9 +99,10 @@ Ext.define('DNSProxy.app.Application', {
         var myStore = Ext.create('Ext.data.Store', {
             model: 'Model1',
             storeId: 'Sample',
+            groupField: 'tld',
             proxy: {
                 storeId: 'Sample',
-                url: window.location.origin,
+                url: window.location.origin+'/-/table',
                 type: 'socketio',
                 reader: {
                     type: 'json',
@@ -113,11 +115,84 @@ Ext.define('DNSProxy.app.Application', {
         me.grid = Ext.create('Ext.grid.Panel', {
             title: 'DNS Request',
             store: Ext.data.StoreManager.lookup('Sample'),
+            features: [{
+                ftype:'grouping',
+                groupHeaderTpl: '{columnName}: {name} ({rows.length} Item{[values.rows.length > 1 ? "s" : ""]})'
+            }],
             columns: [
+                { text: 'Top-Level-Domain',  dataIndex: 'tld', flex: 1 },
                 { text: 'Domain',  dataIndex: 'name', flex: 1 },
                 { text: 'Address', dataIndex: 'address', flex: 1 },
                 { text: 'last Query', dataIndex: 'queryAt', flex: 1 } ,
-                { text: 'TTL', dataIndex: 'ttl', flex: 1 }            
+                { text: 'TTL', dataIndex: 'ttl', flex: 1 }            ,
+                { text: 'Type', dataIndex: 'type', flex: 1 ,
+                 renderer: function(value){
+                     switch(value){
+                         case 1:
+                             value = '<span style="color: green;">A</span>';
+                             break;
+                         case 28:
+                             value = '<span style="color: blue;">AAAA</span>';
+                             break;
+                         case 15:
+                             value = '<span style="color: yellow;">MX</span>';
+                             break;
+                         default:
+                             value = '<span style="color: gray;">'+value+'</span>';
+                             break;
+                     }
+                     return value;
+                 }
+                }            ,
+                { text: 'Class', dataIndex: 'class', flex: 1 }            
+            ]
+        });
+        
+        
+        
+        //####################################
+        
+        
+        Ext.define('Model2', {
+            extend: 'Ext.data.TreeModel',
+            fields: [
+                {name: 'name',   type: 'string'}
+            ]
+        });
+        
+
+        me.treestore = Ext.create('Ext.data.TreeStore', {
+            model: 'Model2',
+            storeId: 'Sample2',
+            proxy: {
+                storeId: 'Sample2',
+                url: window.location.origin+'/t.json',
+                type: 'ajax',
+                reader: {
+                    type: 'json'
+                }
+                
+                
+            },
+            autoLoad: true,
+            folderSort: true
+        });
+        
+        
+        
+        me.tree = Ext.create('Ext.tree.Panel', {
+            title: 'Domaintree',
+            store: me.treestore,
+            rootVisible: true,
+            columns: [
+                {
+                    xtype: 'treecolumn', //this is so we know which column will show the tree
+                    text: 'Task',
+                    width: 200,
+                    sortable: true,
+                    dataIndex: 'task',
+                    locked: true
+                }
             ]
         });
         
@@ -143,7 +218,8 @@ Ext.define('DNSProxy.app.Application', {
                 region: 'center',
                 xtype: 'tabpanel',
                 items:[
-                    me.grid,
+                    me.tree,
+                    me.grid
                     //myFormPanel
                 ]
             }

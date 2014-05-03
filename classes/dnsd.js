@@ -42,19 +42,21 @@ var DNSD = function(server){
 DNSD.prototype.initialize = function(){
     var me = this;
 
-    me.queries = new Queries();
+    
+    me.queries = new Queries(me.server);
+    
     me.initSocketIO();
     me.initDnsService();
     me.initExpress();
 
     me.queries.on('create', function(data){
-        me.io.sockets.emit('create',{data: [data]});
+        me.io.of('/-/table').emit('create',{data: [data]});
     });
     me.queries.on('update', function(data){
-        me.io.sockets.emit('update',{data: [data]});
+        me.io.of('/-/table').emit('update',{data: [data]});
     });
     me.queries.on('destroy', function(data){
-        me.io.sockets.emit('destroy',{data: [data]});
+        me.io.of('/-/table').emit('destroy',{data: [data]});
     });
 }
 
@@ -67,7 +69,55 @@ DNSD.prototype.initSocketIO = function(){
     var me = this;
     me.io = require('socket.io').listen(me.server.httpServer);
     me.io.set('log level',1);
-    me.io.sockets.on('connection', me.onSocketConnection.bind(me));
+    me.io.of('/-/table').on('connection', function(socket){
+        socket.on('read', function(data){
+            socket.emit('read',{
+                data: [],
+                length: 0
+            });
+            console.log('table',data);
+        });
+    });
+    me.io.of('/-/tree').on('connection', function(socket){
+        socket.on('read', function(data){
+            console.log(socket);
+            if (JSON.stringify(data) === "{}"){
+                socket.emit('read',
+                            {
+                                "text": ".",
+                                "task": "Test 000",
+                                        "id": 'root',
+                                "children":[
+                                    {
+                                        "task": "Test 123",
+                                        id: 1,
+                                        "children":[
+                                            {
+                                                "task": "Test 1",
+                                                id: 2,
+                                                leaf: true
+                                            },
+                                            {
+                                                "task": "Test 2",
+                                                id: 3,
+                                                leaf: true
+                                            },
+                                            {
+                                                "task": "Test 3",
+                                                id: 4,
+                                                leaf: true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                
+            );
+            console.log(data);
+            }
+            //socket.emit('read',me.queries.tree);
+        });
+    });
     me.timerIndex = 0;
 
 }
@@ -88,6 +138,37 @@ DNSD.prototype.initExpress = function(){
     me.server.app.get(me.server.configuration.basePath+'/',me.loadui.bind(me));
     me.server.app.post(me.server.configuration.basePath+'/',me.loadui.bind(me));
 
+    me.server.app.all(me.server.configuration.basePath+'/t.json',function(req,res,next){
+        console.log(req);
+        res.json('200',{
+                                "text": ".",
+                                "task": "Test 000",
+                                        "id": 'root',
+                                "children":[
+                                    {
+                                        "task": "Test 123",
+                                        id: 1,
+                                        "children":[
+                                            {
+                                                "task": "Test 1",
+                                                id: 2,
+                                                leaf: true
+                                            },
+                                            {
+                                                "task": "Test 2",
+                                                id: 3,
+                                                leaf: true
+                                            },
+                                            {
+                                                "task": "Test 3",
+                                                id: 4,
+                                                leaf: true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            });
+    });
 }
 
 /**
@@ -101,21 +182,27 @@ DNSD.prototype.initDnsService = function(){
 
     me.dnsd.on('request', function (request, response) {
         var start = (new Date()).getTime();
-        
+        //console.log(request);
         if (typeof request.question !== 'undefined'){
             me.loopQuestions(request.question,function(answers){
                 response.answer = answers ;
-
-                response.send();
-                me.queries.append({
-                    questions: request.question,
-                    answers: answers
-                });
-                me.logger.info('Finished processing request: ' + ( (new Date()).getTime() - start ).toString() + 'ms');
+                
+                try{
+                    response.send();
+                }catch(e){
+                    try{
+                        response.answer =[];
+                        response.send();
+                    }catch(e2){
+                        me.logger.error(e2,answers);
+                    }
+                }
+                
+                //me.logger.info('*Finished processing request: ' + ( (new Date()).getTime() - start ).toString() + 'ms');
             });
         }else{
             response.send();
-            me.logger.info('Finished processing request: ' + ( (new Date()).getTime() - start ).toString() + 'ms');
+            me.logger.info('Somthing went wrong! Finished processing request: ' + ( (new Date()).getTime() - start ).toString() + 'ms');
         }
 
 
@@ -153,46 +240,17 @@ DNSD.prototype.loopQuestions=function(questions,callback,answers){
     if (questions.length === 0){
         callback(answers);
     }else{
-        dnsQuestion = nativedns.Question(questions[0]);
-
-        dnsRequest = nativedns.Request({
-            question: dnsQuestion,
-            server: { address: '8.8.8.8', port: 53, type: 'udp' },
-            timeout: 1000
-        });
-
-        dnsRequest.on('timeout', function () {
-            //console.log('Timeout in making request');
-        });
-
-        dnsRequest.on('message', function (err, msg) {
-            msg.answer.forEach(function (a) {
+        
+        me.queries.resolve(questions[0],function(err,items){
+            items.forEach(function (a) {
                 answers.push(a);
             });
-        });
-
-        dnsRequest.on('end', function () {
             me.loopQuestions(questions.slice(1),callback,answers);
         });
-
-
-        dnsRequest.send();
-
+        
     }
 }
 
-/**
-* @method onSocketConnection
-* On every new socket.io connection this method will be called.
-*/
-DNSD.prototype.onSocketConnection = function(socket){
-    var me = this;
-    //var name = userNames.getGuestName();
-    //this.logger.debug('socket','name',name);
-    socket.on('read', function(){
-        
-    });
-}
 
 
 /**

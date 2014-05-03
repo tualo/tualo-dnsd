@@ -1,10 +1,15 @@
 {
     "dnsd":{
-        "port": 5353 
+        "port": 53 
     },
     "frontend":{
         "address": "127.0.0.1", 
         "port": 8010
+    },
+    "external dns":{
+        "address": "8.8.8.8",
+        "port": 53,
+        "type": "upd"
     },
     "storage": "memory",
     "log":{

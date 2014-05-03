@@ -1,3 +1,4 @@
+.DS_Store
+config/cache.json
 node_modules
-
-/node_modules
+public/test.json
